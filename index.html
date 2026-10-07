@@ -1,82 +1,175 @@
 <!doctype html>
-<html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Green Messenger</title><meta name="version" content="2026-10-07-2">
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="version" content="3.0">
+<title>Green Messenger</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#07130e;color:#e9fff2;font:15px system-ui,-apple-system,sans-serif}button,input{font:inherit}button{cursor:pointer;border:0}.wrap{min-height:100vh;display:grid;place-items:center;padding:16px}.card{width:min(430px,100%);background:#0d2118;border:1px solid #1c4933;border-radius:22px;padding:24px;box-shadow:0 20px 60px #0008}.logo{font-size:28px;font-weight:800;margin-bottom:18px;color:#5dff9a}.tabs{display:flex;gap:8px;margin-bottom:16px}.tabs button,.ghost{background:#143523;color:#bfffd3;padding:10px 14px;border-radius:12px}.tabs .on{background:#20b968;color:white}.field{margin:10px 0}.field input{width:100%;padding:13px;border-radius:12px;border:1px solid #28563d;background:#081810;color:white;outline:0}.primary{width:100%;padding:13px;border-radius:12px;background:#20b968;color:white;font-weight:700}.muted{color:#91ad9c;font-size:13px}.err{color:#ff8e8e;margin:10px 0}.app{height:100vh;display:grid;grid-template-columns:330px 1fr}.side{border-right:1px solid #173a29;background:#0a1b13;display:flex;flex-direction:column}.top{padding:18px;border-bottom:1px solid #173a29}.top b{font-size:22px;color:#5dff9a}.search{margin-top:12px;width:100%;padding:11px;border-radius:12px;border:1px solid #28563d;background:#081810;color:white}.users{position:absolute;top:104px;left:18px;right:18px;background:#102a1d;border:1px solid #28563d;border-radius:12px;z-index:3;max-height:220px;overflow:auto}.user{padding:11px;display:flex;gap:10px;align-items:center}.user:hover,.chat:hover{background:#123522}.avatar{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:#20b968;color:white;font-weight:700;flex:none}.chat{padding:13px 18px;display:flex;gap:11px;align-items:center;border-bottom:1px solid #102a1e}.chat b{display:block}.chat small{color:#779786}.main{display:flex;flex-direction:column;min-width:0}.head{height:68px;padding:12px 18px;border-bottom:1px solid #173a29;display:flex;align-items:center;gap:12px}.back{display:none;background:none;color:#5dff9a;font-size:22px}.msgs{flex:1;overflow:auto;padding:18px}.bubble{max-width:75%;padding:10px 13px;margin:7px 0;border-radius:16px;background:#143523;white-space:pre-wrap;overflow-wrap:anywhere}.mine{margin-left:auto;background:#20b968}.time{font-size:10px;opacity:.7;margin-top:3px}.send{display:flex;gap:8px;padding:12px;border-top:1px solid #173a29}.send input{flex:1;padding:13px;border-radius:14px;border:1px solid #28563d;background:#081810;color:white}.send button{width:48px;border-radius:14px;background:#20b968;color:white}.empty{margin:auto;text-align:center;color:#718e7d}.hidden{display:none!important}@media(max-width:700px){.app{display:block}.side{height:100vh}.main{display:none;height:100vh}.app.chat-open .side{display:none}.app.chat-open .main{display:flex}.back{display:block}}
-</style></head><body>
-<div id="auth" class="wrap"><div class="card"><div class="logo">Green Messenger</div><h2 style="margin:0 0 10px">Вход через Telegram</h2><p class="muted">Нажми кнопку ниже, открой бота и подтверди вход.</p><a id="tgLogin" class="primary" href="https://t.me/I6767bot" style="display:flex;align-items:center;justify-content:center;text-decoration:none;margin:20px 0;min-height:52px;font-size:16px">🔐 Войти через Telegram</a>
-<div id="loginStatus" class="muted" style="line-height:1.5"></div><div id="err" class="err"></div><p class="muted">Аккаунт создаётся автоматически после подтверждения Telegram.</p></div></div>
-<div id="app" class="app hidden"><aside class="side"><div class="top"><b>Сообщения</b><input id="search" class="search" placeholder="Найти пользователя"><div id="users" class="users hidden"></div></div><div id="chats"></div><div style="margin-top:auto;padding:14px"><button id="logout" class="ghost">Выйти</button></div></aside>
-<main class="main"><header class="head"><button id="back" class="back">‹</button><div id="title"><b>Выберите чат</b></div></header><div id="msgs" class="msgs"><div class="empty">Начните новый чат через поиск</div></div><form id="send" class="send hidden"><input id="text" maxlength="5000" placeholder="Сообщение..."><button>➤</button></form></main></div>
+*{box-sizing:border-box}html,body{margin:0;height:100%;font-family:system-ui,-apple-system,sans-serif;background:#06100b;color:#edfff3}button,input{font:inherit}button{cursor:pointer;border:0}
+.hidden{display:none!important}.page{min-height:100vh}.auth{display:grid;place-items:center;padding:20px}.card{width:min(430px,100%);background:#0b1d14;border:1px solid #1d4931;border-radius:24px;padding:25px;box-shadow:0 20px 70px #0009}.logo{font-size:29px;font-weight:800;color:#55f596;margin-bottom:7px}.sub{color:#8eaa99;font-size:14px;line-height:1.5}.tg{width:100%;min-height:54px;margin-top:22px;border-radius:15px;background:#20bd6a;color:#fff;font-weight:800;font-size:16px;text-decoration:none;display:flex;align-items:center;justify-content:center}.tg:active{transform:scale(.99)}.status{min-height:22px;margin-top:13px;color:#91ad9c;font-size:13px}.error{color:#ff8888;font-size:13px;margin-top:8px}
+.app{height:100dvh;display:grid;grid-template-columns:320px 1fr;background:#07130e}.sidebar{border-right:1px solid #183b29;background:#091a12;display:flex;flex-direction:column;min-width:0}.sidehead{padding:18px;border-bottom:1px solid #183b29}.sidehead strong{font-size:22px;color:#55f596}.search{width:100%;margin-top:13px;padding:12px 14px;border-radius:13px;border:1px solid #28543b;background:#07140d;color:#fff;outline:0}.search:focus{border-color:#20bd6a}.results{max-height:230px;overflow:auto;margin-top:8px;border:1px solid #244d36;border-radius:13px;background:#0e2619}.person,.chat{display:flex;align-items:center;gap:11px;padding:12px 14px}.person:hover,.chat:hover{background:#123521}.person{cursor:pointer}.avatar{width:42px;height:42px;flex:0 0 42px;border-radius:50%;display:grid;place-items:center;background:#20bd6a;color:#fff;font-weight:800}.info{min-width:0}.info b,.info small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.info small{color:#779886;margin-top:2px}.chat{cursor:pointer;border-bottom:1px solid #10281c}.logout{margin-top:auto;padding:14px}.ghost{padding:10px 14px;border-radius:12px;background:#143321;color:#bdf8d0}
+.main{display:flex;flex-direction:column;min-width:0}.header{height:68px;display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid #183b29}.back{display:none;background:none;color:#55f596;font-size:28px}.messages{flex:1;overflow:auto;padding:18px}.empty{height:100%;display:grid;place-items:center;text-align:center;color:#6e8a79}.bubble{width:max-content;max-width:min(75%,600px);padding:10px 13px;margin:7px 0;border-radius:17px;background:#123521;white-space:pre-wrap;overflow-wrap:anywhere}.bubble.mine{margin-left:auto;background:#20bd6a}.time{font-size:10px;opacity:.7;margin-top:3px}.send{display:flex;gap:8px;padding:12px;border-top:1px solid #183b29}.send input{flex:1;min-width:0;padding:13px 14px;border-radius:14px;border:1px solid #28543b;background:#07140d;color:#fff;outline:0}.send button{width:50px;border-radius:14px;background:#20bd6a;color:#fff;font-size:19px}
+@media(max-width:700px){.app{display:block}.sidebar{height:100dvh}.main{display:none;height:100dvh}.app.open .sidebar{display:none}.app.open .main{display:flex}.back{display:block}}
+</style>
+</head>
+<body>
+<section id="auth" class="page auth">
+<div class="card">
+<div class="logo">Green Messenger</div>
+<h2 style="margin:0 0 8px">Вход через Telegram</h2>
+<div class="sub">Нажми кнопку. Откроется <b>@I6767bot</b>. Нажми Start — после этого сайт войдёт автоматически.</div>
+<a id="tgLogin" class="tg" href="https://t.me/I6767bot">🔐 Войти через Telegram</a>
+<div id="status" class="status"></div><div id="error" class="error"></div>
+</div>
+</section>
+
+<section id="app" class="app hidden">
+<aside class="sidebar">
+<div class="sidehead">
+<strong>Сообщения</strong>
+<input id="search" class="search" placeholder="Найти пользователя">
+<div id="results" class="results hidden"></div>
+</div>
+<div id="chats"></div>
+<div class="logout"><button id="logout" class="ghost">Выйти</button></div>
+</aside>
+<main class="main">
+<header class="header"><button id="back" class="back">‹</button><div id="chatTitle"><b>Выберите чат</b></div></header>
+<div id="messages" class="messages"><div class="empty">Найдите пользователя через поиск<br>и начните чат</div></div>
+<form id="send" class="send hidden"><input id="message" maxlength="5000" autocomplete="off" placeholder="Сообщение..."><button type="submit">➤</button></form>
+</main>
+</section>
+
 <script>
-const URL='https://ckcfxpaacogrwhimprhj.supabase.co',KEY='sb_publishable_BpY9Xd2oNA-dAP0O_5jYvQ_ljhgUsVm';
-const db=supabase.createClient(URL,KEY);let user=null,current=null,channel=null;
-const $=id=>document.getElementById(id), initials=s=>(s||'?').trim().slice(0,1).toUpperCase();
-function err(x){$('err').textContent=x||''}
-let loginTimer=null;
-async function openTelegramLogin(){
-  const b=$('tgLogin');
-  b.style.pointerEvents='none';
-  b.textContent='⏳ Подключение…';
-  err('');
-  $('loginStatus').textContent='Создаём вход…';
-  try{
-    const response=await fetch(URL+'/functions/v1/telegram-bot',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({action:'start'})
-    });
-    const data=await response.json();
-    if(!response.ok || !data.id) throw new Error(data.error || 'Сервер не создал сессию');
-    localStorage.setItem('tg_login_session',data.id);
-    const telegramUrl='https://t.me/I6767bot?start='+encodeURIComponent(data.id);
-    $('loginStatus').textContent='Открываем Telegram…';
-    b.href=telegramUrl;
-    b.textContent='➡️ Открыть Telegram';
-    window.location.assign(telegramUrl);
-  }catch(error){
-    b.style.pointerEvents='auto';
-    b.href='https://t.me/I6767bot';
-    b.textContent='🔐 Войти через Telegram';
-    $('loginStatus').textContent='';
-    err(error.message || 'Не удалось открыть регистрацию');
-  }
+const SUPABASE_URL='https://ckcfxpaacogrwhimprhj.supabase.co';
+const SUPABASE_KEY='sb_publishable_BpY9Xd2oNA-dAP0O_5jYvQ_ljhgUsVm';
+const BOT='I6767bot';
+const SITE=location.origin+location.pathname;
+const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const $=id=>document.getElementById(id);
+let me=null,active=null,realtime=null,poll=null;
+
+function showError(x){$('error').textContent=x||''}
+function showStatus(x){$('status').textContent=x||''}
+function setLoginBusy(v){$('tgLogin').style.pointerEvents=v?'none':'auto';$('tgLogin').style.opacity=v?.65:1}
+
+async function createLogin(){
+ setLoginBusy(true);showError('');showStatus('Создаём вход…');
+ try{
+  const r=await fetch(SUPABASE_URL+'/functions/v1/telegram-bot',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'start'})});
+  const x=await r.json();
+  if(!r.ok||!x.id)throw Error(x.error||'Не удалось создать вход');
+  localStorage.setItem('green_tg_session',x.id);
+  const url='https://t.me/'+BOT+'?start='+encodeURIComponent(x.id);
+  $('tgLogin').href=url;
+  showStatus('Открываем Telegram…');
+  location.href=url;
+ }catch(e){setLoginBusy(false);showStatus('');showError(e.message||'Ошибка')}
 }
-async function checkTelegramLogin(){
-  const id=localStorage.getItem('tg_login_session');
-  if(!id) return;
-  $('tgLogin').style.pointerEvents='none';
-  $('loginStatus').textContent='Ожидаем подтверждение в @I6767bot…';
-  if(loginTimer) clearInterval(loginTimer);
-  const check=async()=>{
-    try{
-      const s=await fetch(URL+'/functions/v1/telegram-bot',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'status',id})});
-      const x=await s.json();
-      if(x.status==='approved'){
-        clearInterval(loginTimer); localStorage.removeItem('tg_login_session');
-        $('loginStatus').textContent='Регистрация подтверждена. Входим…';
-        const a=await db.auth.signInWithPassword({email:x.email,password:x.password});
-        if(a.error){$('tgLogin').disabled=false;return err(a.error.message)}
-      }else if(x.status==='expired'){
-        clearInterval(loginTimer);localStorage.removeItem('tg_login_session');
-        $('tgLogin').style.pointerEvents='auto';$('tgLogin').href='https://t.me/I6767bot';$('loginStatus').textContent='Сессия истекла. Нажми кнопку ещё раз.';
-      }
-    }catch(e){}
-  };
-  await check(); loginTimer=setInterval(check,1500);
+$('tgLogin').onclick=e=>{e.preventDefault();createLogin()};
+
+async function checkLogin(){
+ const id=localStorage.getItem('green_tg_session');if(!id)return;
+ setLoginBusy(true);showStatus('Ожидаем подтверждение в Telegram…');
+ if(poll)clearInterval(poll);
+ const run=async()=>{
+  try{
+   const r=await fetch(SUPABASE_URL+'/functions/v1/telegram-bot',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'status',id})});
+   const x=await r.json();
+   if(x.status==='approved'){
+    clearInterval(poll);localStorage.removeItem('green_tg_session');showStatus('Вход выполнен…');
+    const a=await db.auth.signInWithPassword({email:x.email,password:x.password});
+    if(a.error)throw a.error;
+   }else if(x.status==='expired'){
+    clearInterval(poll);localStorage.removeItem('green_tg_session');setLoginBusy(false);showStatus('');showError('Ссылка устарела. Нажми кнопку ещё раз.');
+   }
+  }catch(e){console.error(e)}
+ };
+ await run();poll=setInterval(run,1500);
 }
 
-async function start(){let r=await db.auth.getUser();user=r.data.user;if(!user)return;$('auth').classList.add('hidden');$('app').classList.remove('hidden');await loadChats()}
-db.auth.onAuthStateChange((_e,s)=>{if(s)start()});
-$('logout').onclick=async()=>{await db.auth.signOut();location.reload()};
-async function loadChats(){let m=await db.from('conversation_members').select('conversation_id').eq('user_id',user.id);if(m.error)return;let ids=m.data.map(x=>x.conversation_id);$('chats').innerHTML='';if(!ids.length)return;let cs=await db.from('conversations').select('id,created_at').in('id',ids).order('created_at',{ascending:false});for(const c of cs.data||[]){let ms=await db.from('conversation_members').select('user_id').eq('conversation_id',c.id);let other=(ms.data||[]).find(x=>x.user_id!==user.id);if(!other)continue;let p=await db.from('profiles').select('display_name,username').eq('id',other.user_id).single();let el=document.createElement('div');el.className='chat';el.innerHTML='<div class="avatar">'+initials(p.data?.display_name)+'</div><div><b></b><small></small></div>';el.querySelector('b').textContent=p.data?.display_name||p.data?.username||'Пользователь';el.querySelector('small').textContent='@'+(p.data?.username||'');el.onclick=()=>openChat(c.id,other.user_id,p.data);$('chats').appendChild(el)}}
-$('search').oninput=async()=>{let q=$('search').value.trim();if(!q){$('users').classList.add('hidden');return}let r=await db.from('profiles').select('id,username,display_name').neq('id',user.id).or('username.ilike.%'+q+'%,display_name.ilike.%'+q+'%').limit(10);$('users').innerHTML='';for(const p of r.data||[]){let el=document.createElement('div');el.className='user';el.innerHTML='<div class="avatar">'+initials(p.display_name)+'</div><div><b></b><small></small></div>';el.querySelector('b').textContent=p.display_name;el.querySelector('small').textContent='@'+p.username;el.onclick=()=>newChat(p);$('users').appendChild(el)}$('users').classList.remove('hidden')};
-async function newChat(p){$('users').classList.add('hidden');$('search').value='';let mm=await db.from('conversation_members').select('conversation_id').eq('user_id',user.id);for(const x of mm.data||[]){let q=await db.from('conversation_members').select('user_id').eq('conversation_id',x.conversation_id);if((q.data||[]).some(v=>v.user_id===p.id))return openChat(x.conversation_id,p.id,p)}let c=await db.from('conversations').insert({}).select().single();if(c.error)return alert(c.error.message);await db.from('conversation_members').insert([{conversation_id:c.data.id,user_id:user.id},{conversation_id:c.data.id,user_id:p.id}]);await loadChats();openChat(c.data.id,p.id,p)}
-async function openChat(id,other,p){current={id,other};$('title').innerHTML='';let b=document.createElement('b');b.textContent=p?.display_name||'Чат';$('title').appendChild(b);$('msgs').innerHTML='';$('send').classList.remove('hidden');$('app').classList.add('chat-open');let r=await db.from('messages').select('id,sender_id,content,created_at').eq('conversation_id',id).order('created_at');for(const m of r.data||[])addMsg(m);if(channel)db.removeChannel(channel);channel=db.channel('chat-'+id).on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:'conversation_id=eq.'+id},payload=>{if(payload.new.sender_id!==user.id)addMsg(payload.new)}).subscribe()}
-function addMsg(m){let el=document.createElement('div');el.className='bubble '+(m.sender_id===user.id?'mine':'');let body=document.createElement('div');body.textContent=m.content;let t=document.createElement('div');t.className='time';t.textContent=new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});el.append(body,t);$('msgs').appendChild(el);$('msgs').scrollTop=$('msgs').scrollHeight}
-$('send').onsubmit=async e=>{e.preventDefault();if(!current||!$('text').value.trim())return;let content=$('text').value.trim();let r=await db.from('messages').insert({conversation_id:current.id,sender_id:user.id,content}).select().single();if(r.error)return alert(r.error.message);addMsg(r.data);$('text').value=''};
-$('back').onclick=()=>{$('app').classList.remove('chat-open');if(channel){db.removeChannel(channel);channel=null}};
-$('tgLogin').addEventListener('click',function(e){e.preventDefault();openTelegramLogin();});
-start();
-checkTelegramLogin();
-</script></body></html>
+async function boot(){
+ const r=await db.auth.getUser();me=r.data.user;
+ if(me){$('auth').classList.add('hidden');$('app').classList.remove('hidden');await loadChats()}
+}
+db.auth.onAuthStateChange((event,session)=>{
+ if(session){me=session.user;$('auth').classList.add('hidden');$('app').classList.remove('hidden');loadChats()}
+});
+$('logout').onclick=async()=>{await db.auth.signOut();localStorage.removeItem('green_tg_session');location.reload()};
+
+async function loadChats(){
+ const m=await db.from('conversation_members').select('conversation_id').eq('user_id',me.id);
+ if(m.error)return;
+ $('chats').innerHTML='';
+ for(const row of m.data||[]){
+  const q=await db.from('conversation_members').select('user_id').eq('conversation_id',row.conversation_id);
+  const other=(q.data||[]).find(x=>x.user_id!==me.id);if(!other)continue;
+  const p=await db.from('profiles').select('id,username,display_name').eq('id',other.user_id).maybeSingle();
+  if(!p.data)continue;
+  addChat(row.conversation_id,p.data);
+ }
+}
+function addChat(id,p){
+ const el=document.createElement('div');el.className='chat';
+ el.innerHTML='<div class="avatar"></div><div class="info"><b></b><small></small></div>';
+ el.querySelector('.avatar').textContent=(p.display_name||'?')[0].toUpperCase();
+ el.querySelector('b').textContent=p.display_name||p.username;
+ el.querySelector('small').textContent='@'+(p.username||'');
+ el.onclick=()=>openChat(id,p);$('chats').appendChild(el);
+}
+$('search').oninput=async()=>{
+ const q=$('search').value.trim();
+ if(!q){$('results').classList.add('hidden');return}
+ const r=await db.from('profiles').select('id,username,display_name').neq('id',me.id).or('username.ilike.%'+q+'%,display_name.ilike.%'+q+'%').limit(15);
+ $('results').innerHTML='';
+ for(const p of r.data||[]){
+  const el=document.createElement('div');el.className='person';
+  el.innerHTML='<div class="avatar"></div><div class="info"><b></b><small></small></div>';
+  el.querySelector('.avatar').textContent=(p.display_name||'?')[0].toUpperCase();
+  el.querySelector('b').textContent=p.display_name||p.username;
+  el.querySelector('small').textContent='@'+(p.username||'');
+  el.onclick=()=>startChat(p);$('results').appendChild(el);
+ }
+ $('results').classList.remove('hidden');
+};
+async function startChat(p){
+ $('results').classList.add('hidden');$('search').value='';
+ const mine=await db.from('conversation_members').select('conversation_id').eq('user_id',me.id);
+ for(const x of mine.data||[]){
+  const q=await db.from('conversation_members').select('user_id').eq('conversation_id',x.conversation_id);
+  if((q.data||[]).some(v=>v.user_id===p.id)){openChat(x.conversation_id,p);return}
+ }
+ const c=await db.from('conversations').insert({}).select('id').single();
+ if(c.error)return alert(c.error.message);
+ const ins=await db.from('conversation_members').insert([{conversation_id:c.data.id,user_id:me.id},{conversation_id:c.data.id,user_id:p.id}]);
+ if(ins.error)return alert(ins.error.message);
+ await loadChats();openChat(c.data.id,p);
+}
+async function openChat(id,p){
+ active={id,p};$('chatTitle').innerHTML='';
+ const b=document.createElement('b');b.textContent=p.display_name||p.username;$('chatTitle').appendChild(b);
+ $('messages').innerHTML='';$('send').classList.remove('hidden');$('app').classList.add('open');
+ const r=await db.from('messages').select('id,sender_id,content,created_at').eq('conversation_id',id).order('created_at');
+ for(const m of r.data||[])drawMessage(m);
+ if(realtime)await db.removeChannel(realtime);
+ realtime=db.channel('messages-'+id).on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:'conversation_id=eq.'+id},x=>{if(x.new.sender_id!==me.id)drawMessage(x.new)}).subscribe();
+}
+function drawMessage(m){
+ const el=document.createElement('div');el.className='bubble'+(m.sender_id===me.id?' mine':'');
+ const body=document.createElement('div');body.textContent=m.content;
+ const time=document.createElement('div');time.className='time';time.textContent=new Date(m.created_at).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+ el.append(body,time);$('messages').appendChild(el);$('messages').scrollTop=$('messages').scrollHeight;
+}
+$('send').onsubmit=async e=>{
+ e.preventDefault();if(!active)return;
+ const input=$('message'),content=input.value.trim();if(!content)return;
+ const r=await db.from('messages').insert({conversation_id:active.id,sender_id:me.id,content}).select('id,sender_id,content,created_at').single();
+ if(r.error)return alert(r.error.message);drawMessage(r.data);input.value='';input.focus();
+};
+$('back').onclick=()=>{$('app').classList.remove('open');if(realtime){db.removeChannel(realtime);realtime=null}};
+boot();checkLogin();
+</script>
+</body>
+</html>
