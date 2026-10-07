@@ -10,12 +10,21 @@
 <main class="main"><header class="head"><button id="back" class="back">‹</button><div id="title"><b>Выберите чат</b></div></header><div id="msgs" class="msgs"><div class="empty">Начните новый чат через поиск</div></div><form id="send" class="send hidden"><input id="text" maxlength="5000" placeholder="Сообщение..."><button>➤</button></form></main></div>
 <script>
 const URL='https://ckcfxpaacogrwhimprhj.supabase.co',KEY='sb_publishable_BpY9Xd2oNA-dAP0O_5jYvQ_ljhgUsVm';
-const db=supabase.createClient(URL,KEY);let user=null,current=null,channel=null,signup=false;
+const db=supabase.createClient(URL,KEY);let user=null,current=null,channel=null;
 const $=id=>document.getElementById(id), initials=s=>(s||'?').trim().slice(0,1).toUpperCase();
 function err(x){$('err').textContent=x||''}
-$('loginTab').onclick=()=>{signup=false;$('loginTab').classList.add('on');$('signupTab').classList.remove('on');$('nameField').classList.add('hidden');$('authBtn').textContent='Войти';err('')};
-$('signupTab').onclick=()=>{signup=true;$('signupTab').classList.add('on');$('loginTab').classList.remove('on');$('nameField').classList.remove('hidden');$('authBtn').textContent='Создать аккаунт';err('')};
-$('authBtn').onclick=async()=>{err('');let email=$('email').value.trim(),pass=$('pass').value,name=$('name').value.trim()||email.split('@')[0];if(!email||!pass)return err('Заполните email и пароль');if(signup){let r=await db.auth.signUp({email,password:pass});if(r.error)return err(r.error.message);if(r.data.user){let username=(name.toLowerCase().replace(/[^a-z0-9_а-яё]/gi,'_')+'_'+r.data.user.id.slice(0,6)).slice(0,40);let p=await db.from('profiles').insert({id:r.data.user.id,username,display_name:name});if(p.error)return err(p.error.message)}if(!r.data.session)return err('Аккаунт создан. Подтвердите email, затем войдите.');}else{let r=await db.auth.signInWithPassword({email,password:pass});if(r.error)return err(r.error.message)}};
+window.onTelegramAuth=async function(tg){
+  err('Проверяем Telegram…');
+  const r=await fetch(URL+'/functions/v1/telegram-auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({telegram:tg})});
+  const j=await r.json(); if(!r.ok)return err(j.error||'Ошибка авторизации');
+  const s=await db.auth.signInWithPassword({email:j.email,password:j.password});
+  if(s.error)return err(s.error.message);
+};
+(function(){
+  const s=document.createElement('script');s.async=true;s.src='https://telegram.org/js/telegram-widget.js?22';
+  s.setAttribute('data-telegram-login','School_bitva_bot');s.setAttribute('data-size','large');s.setAttribute('data-userpic','false');
+  s.setAttribute('data-onauth','onTelegramAuth(user)');s.setAttribute('data-request-access','write');$('tg').appendChild(s);
+})();
 async function start(){let r=await db.auth.getUser();user=r.data.user;if(!user)return;$('auth').classList.add('hidden');$('app').classList.remove('hidden');await loadChats()}
 db.auth.onAuthStateChange((_e,s)=>{if(s)start()});
 $('logout').onclick=async()=>{await db.auth.signOut();location.reload()};
