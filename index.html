@@ -14,7 +14,12 @@ const db=supabase.createClient(URL,KEY);let user=null,current=null,channel=null;
 const $=id=>document.getElementById(id), initials=s=>(s||'?').trim().slice(0,1).toUpperCase();
 function err(x){$('err').textContent=x||''}
 let loginTimer=null;
-async function prepareTelegramLogin(){
+async function openTelegramLogin(e){
+  e.preventDefault();
+  const b=$('tgLogin');
+  b.style.pointerEvents='none';
+  b.textContent='⏳ Подключение…';
+  $('loginStatus').textContent='Создаём персональную регистрацию…';
   try{
     const r=await fetch(URL+'/functions/v1/telegram-bot',{
       method:'POST',
@@ -24,11 +29,14 @@ async function prepareTelegramLogin(){
     const j=await r.json();
     if(!r.ok||!j.id) throw new Error(j.error||'Не удалось создать сессию');
     localStorage.setItem('tg_login_session',j.id);
-    $('tgLogin').href='https://t.me/I6767bot?start='+encodeURIComponent(j.id);
-    $('loginStatus').textContent='Готово. Нажми кнопку — откроется @I6767bot.';
+    const url='https://t.me/I6767bot?start='+encodeURIComponent(j.id);
+    $('loginStatus').textContent='Открываем Telegram…';
+    window.location.assign(url);
   }catch(e){
-    $('tgLogin').href='https://t.me/I6767bot';
-    $('loginStatus').textContent='Нажми кнопку, чтобы открыть @I6767bot.';
+    b.style.pointerEvents='';
+    b.textContent='🔐 Войти через Telegram';
+    $('loginStatus').textContent='';
+    err(e.message||'Ошибка запуска регистрации');
   }
 }
 
@@ -66,7 +74,7 @@ async function openChat(id,other,p){current={id,other};$('title').innerHTML='';l
 function addMsg(m){let el=document.createElement('div');el.className='bubble '+(m.sender_id===user.id?'mine':'');let body=document.createElement('div');body.textContent=m.content;let t=document.createElement('div');t.className='time';t.textContent=new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});el.append(body,t);$('msgs').appendChild(el);$('msgs').scrollTop=$('msgs').scrollHeight}
 $('send').onsubmit=async e=>{e.preventDefault();if(!current||!$('text').value.trim())return;let content=$('text').value.trim();let r=await db.from('messages').insert({conversation_id:current.id,sender_id:user.id,content}).select().single();if(r.error)return alert(r.error.message);addMsg(r.data);$('text').value=''};
 $('back').onclick=()=>{$('app').classList.remove('chat-open');if(channel){db.removeChannel(channel);channel=null}};
+$('tgLogin').addEventListener('click',openTelegramLogin);
 start();
-prepareTelegramLogin();
 checkTelegramLogin();
 </script></body></html>
