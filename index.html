@@ -14,27 +14,29 @@ const db=supabase.createClient(URL,KEY);let user=null,current=null,channel=null;
 const $=id=>document.getElementById(id), initials=s=>(s||'?').trim().slice(0,1).toUpperCase();
 function err(x){$('err').textContent=x||''}
 let loginTimer=null;
-async function openTelegramLogin(e){
-  if(e)e.preventDefault();
+async function openTelegramLogin(){
   const b=$('tgLogin');
   b.disabled=true;
   b.textContent='⏳ Подключение…';
-  $('loginStatus').textContent='Создаём персональную регистрацию…';
+  err('');
+  $('loginStatus').textContent='Создаём вход…';
   try{
-    const r=await fetch(URL+'/functions/v1/telegram-bot',{
+    const response=await fetch(URL+'/functions/v1/telegram-bot',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({action:'start'})
     });
-    const j=await r.json();
-    if(!r.ok||!j.id) throw new Error(j.error||'Не удалось создать сессию');
-    localStorage.setItem('tg_login_session',j.id);
+    const data=await response.json();
+    if(!response.ok || !data.id) throw new Error(data.error || 'Сервер не создал сессию');
+    localStorage.setItem('tg_login_session',data.id);
+    const telegramUrl='https://t.me/I6767bot?start='+encodeURIComponent(data.id);
     $('loginStatus').textContent='Открываем Telegram…';
-    window.location.href='https://t.me/I6767bot?start='+encodeURIComponent(j.id);
-  }catch(e){
+    window.location.assign(telegramUrl);
+  }catch(error){
     b.disabled=false;
     b.textContent='🔐 Войти через Telegram';
-    err(e.message||'Ошибка запуска регистрации');
+    $('loginStatus').textContent='';
+    err(error.message || 'Не удалось открыть регистрацию');
   }
 }
 async function checkTelegramLogin(){
